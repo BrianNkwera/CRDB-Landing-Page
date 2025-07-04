@@ -1,5 +1,5 @@
 import eli from "../../assets/images/eli.png";
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import mic from "../../assets/icons/mic.svg";
 import paperPinIcon from "../../assets/icons/paperPinIcon.svg"
 
@@ -40,7 +40,7 @@ function Chatbot() {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -121,7 +121,7 @@ function Chatbot() {
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyDown={handleKeyPress}
+                  onKeyDown={(e: KeyboardEvent) => handleKeyPress(e)}
                   placeholder="Type a message"
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 />
