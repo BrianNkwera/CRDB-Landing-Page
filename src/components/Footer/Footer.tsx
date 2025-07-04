@@ -214,7 +214,7 @@ function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full border-0 border-b border-gray-300 bg-transparent px-0 py-2 focus:outline-none focus:ring-0 focus:border-green-500"
+                  className="w-full border-0 border-b border-gray-300 bg-transparent px-0 py-2 outline-none focus:ring-0 focus:border-green-500 border-none"
                 />
 
                 <button
