@@ -181,7 +181,7 @@ function ServicesTabs () {
         {/* Tab Content */}
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {tabContent[activeTab].services.map((service: ServiceType, index: number) => (
+            {tabContent[activeTab as keyof typeof tabContent].services.map((service: ServiceType, index: number) => (
               <div
                 key={index}
                 className="bg-opacity-10 backdrop-blur-sm rounded-xl p-8 text-center hover:bg-opacity-20 transition-all duration-300 cursor-pointer group"
