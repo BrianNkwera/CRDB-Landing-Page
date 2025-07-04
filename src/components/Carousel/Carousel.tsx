@@ -12,7 +12,7 @@ interface CarouselItem {
 
 function Carousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+//   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Sample data - you can replace with your own content
@@ -71,12 +71,12 @@ function Carousel() {
     }
   }, [items.length, currentIndex, isTransitioning]);
 
-  const goToSlide = (index: number) => {
-    if (isTransitioning || index === currentIndex) return;
-    setIsTransitioning(true);
-    setCurrentIndex(index);
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
+//   const goToSlide = (index: number) => {
+//     if (isTransitioning || index === currentIndex) return;
+//     setIsTransitioning(true);
+//     setCurrentIndex(index);
+//     setTimeout(() => setIsTransitioning(false), 500);
+//   };
 
   // Keyboard navigation
   useEffect(() => {
@@ -90,7 +90,7 @@ function Carousel() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextSlide, prevSlide, isAutoPlaying]);
+  }, [nextSlide, prevSlide, /*isAutoPlaying*/]);
 
   return (
     <div className="relative w-full overflow-hidden bg-white mb-16">
