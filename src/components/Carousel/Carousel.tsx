@@ -10,8 +10,6 @@ import {
 } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-
-
 interface CarouselProps {
   children: ReactElement[];
   slidesPerView?: number;
@@ -26,7 +24,7 @@ interface SlideProps {
   style?: CSSProperties;
 }
 
-function Slide({ children, className = "", style = {} }: SlideProps) {
+function Slide({ children, className = "" }: SlideProps) {
   return (
     <div className={`flex-shrink-0 w-full h-full relative ${className}`}>
       {children}
@@ -34,12 +32,12 @@ function Slide({ children, className = "", style = {} }: SlideProps) {
   );
 }
 
-function Carousel ({ 
-  children, 
-  slidesPerView = 1, 
+function Carousel({
+  children,
+  slidesPerView = 1,
   className = "",
   autoPlay = false,
-  autoPlayInterval = 5000 
+  autoPlayInterval = 5000,
 }: CarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   //   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -52,24 +50,25 @@ function Carousel ({
   // Calculate the maximum index based on slides per view
   const maxIndex = Math.max(0, totalSlides - slidesPerView);
 
- // Create extended items array for seamless circular transition
+  // Create extended items array for seamless circular transition
   const extendedSlides = [
-    ...slides.slice(-slidesPerView).map((slide, index) => 
-      cloneElement(slide, { key: `prev-${slide.key || index}` })
-    ), // Last slidesPerView slides at the beginning
-    ...slides.map((slide, index) => 
+    ...slides
+      .slice(-slidesPerView)
+      .map((slide, index) =>
+        cloneElement(slide, { key: `prev-${slide.key || index}` })
+      ), // Last slidesPerView slides at the beginning
+    ...slides.map((slide, index) =>
       cloneElement(slide, { key: `main-${slide.key || index}` })
     ), // Main slides
-    ...slides.slice(0, slidesPerView).map((slide, index) => 
-      cloneElement(slide, { key: `next-${slide.key || index}` })
-    ), // First slidesPerView slides at the end
+    ...slides
+      .slice(0, slidesPerView)
+      .map((slide, index) =>
+        cloneElement(slide, { key: `next-${slide.key || index}` })
+      ), // First slidesPerView slides at the end
   ];
 
-
-
-
-//   // Create extended items array for seamless circular transition
-//   const extendedItems = [...items, items[0]];
+  //   // Create extended items array for seamless circular transition
+  //   const extendedItems = [...items, items[0]];
 
   const nextSlide = useCallback(() => {
     if (isTransitioning || totalSlides <= slidesPerView) return;
@@ -89,7 +88,7 @@ function Carousel ({
     }
   }, [maxIndex, currentIndex, isTransitioning, totalSlides, slidesPerView]);
 
- const prevSlide = useCallback(() => {
+  const prevSlide = useCallback(() => {
     if (isTransitioning || totalSlides <= slidesPerView) return;
     setIsTransitioning(true);
 
@@ -107,19 +106,12 @@ function Carousel ({
     }
   }, [maxIndex, currentIndex, isTransitioning, totalSlides, slidesPerView]);
 
-  //   const goToSlide = (index: number) => {
-  //     if (isTransitioning || index === currentIndex) return;
+  //    const goToSlide = (index: number) => {
+  //     if (isTransitioning || index === currentIndex || totalSlides <= slidesPerView) return;
   //     setIsTransitioning(true);
   //     setCurrentIndex(index);
   //     setTimeout(() => setIsTransitioning(false), 500);
   //   };
-
-   const goToSlide = (index: number) => {
-    if (isTransitioning || index === currentIndex || totalSlides <= slidesPerView) return;
-    setIsTransitioning(true);
-    setCurrentIndex(index);
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
 
   // Auto-play functionality
   useEffect(() => {
@@ -147,7 +139,9 @@ function Carousel ({
   const slideWidth = 100 / slidesPerView;
 
   return (
-    <div className="relative w-full overflow-hidden bg-white mb-16">
+    <div
+      className={`${className} relative w-full overflow-hidden bg-white mb-16`}
+    >
       {/* Main carousel container */}
       <div className="relative h-96 md:h-[500px] overflow-hidden">
         {/* Slides */}
@@ -155,22 +149,26 @@ function Carousel ({
           className={`flex h-full transition-transform duration-500 ease-in-out ${
             isTransitioning ? "" : "transition-none"
           }`}
-          style={{ /*transform: `translateX(-${currentIndex * 100}%)`*/
-            transform: `translateX(-${(currentIndex + slidesPerView) * slideWidth}%)`,
+          style={{
+            /*transform: `translateX(-${currentIndex * 100}%)`*/
+            transform: `translateX(-${
+              (currentIndex + slidesPerView) * slideWidth
+            }%)`,
             //width: `${(extendedSlides.length * 100) / slidesPerView}%`
-           }}
+          }}
         >
-           {extendedSlides.map(slide => {
+          {extendedSlides.map((slide) => {
             const slideProps = slide.props as SlideProps;
             return cloneElement(slide, {
-              style: { 
+              style: {
                 width: `${slideWidth}%`,
-                ...(slideProps.style || {})
+                ...(slideProps.style || {}),
               },
-              className: `${slideProps.className || ''} flex-shrink-0 h-full relative`
+              className: `${
+                slideProps.className || ""
+              } flex-shrink-0 h-full relative`,
             } as Partial<SlideProps>);
-
-})}
+          })}
         </div>
 
         {/* Navigation arrows */}
