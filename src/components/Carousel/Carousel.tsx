@@ -1,47 +1,83 @@
-import { useState, useEffect, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  cloneElement,
+  Children as ReactChildren,
+  type ReactElement,
+  type ReactNode,
+  type CSSProperties,
+} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import samia from "../../assets/images/samia.webp";
-import ndinga from "../../assets/images/ndinga.webp";
 
-interface CarouselItem {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
+
+
+interface CarouselProps {
+  children: ReactElement[];
+  slidesPerView?: number;
+  className?: string;
+  autoPlay?: boolean;
+  autoPlayInterval?: number;
 }
 
-function Carousel() {
+interface SlideProps {
+  children: ReactNode;
+  className?: String;
+  style?: CSSProperties;
+}
+
+function Slide({ children, className = "", style = {} }: SlideProps) {
+  return (
+    <div className={`flex-shrink-0 w-full h-full relative ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function Carousel ({ 
+  children, 
+  slidesPerView = 1, 
+  className = "",
+  autoPlay = false,
+  autoPlayInterval = 5000 
+}: CarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-//   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  //   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Sample data - you can replace with your own content
-  const items: CarouselItem[] = [
-    {
-      id: 1,
-      title: "Samia Infrastructure Financing",
-      description:
-        "Explore breathtaking mountain landscapes and pristine wilderness",
-      image: samia,
-    },
-    {
-      id: 2,
-      title: "Ndinga na Mkwanja Mwaka Mzima",
-      description: "Fanya miamala kwa SimBanking ukiwa na Smartphone au Kiswaswadu",
-      image: ndinga,
-    },
+  // Ensure children is an array
+  const slides = ReactChildren.toArray(children) as ReactElement[];
+  const totalSlides = slides.length;
+
+  // Calculate the maximum index based on slides per view
+  const maxIndex = Math.max(0, totalSlides - slidesPerView);
+
+ // Create extended items array for seamless circular transition
+  const extendedSlides = [
+    ...slides.slice(-slidesPerView).map((slide, index) => 
+      cloneElement(slide, { key: `prev-${slide.key || index}` })
+    ), // Last slidesPerView slides at the beginning
+    ...slides.map((slide, index) => 
+      cloneElement(slide, { key: `main-${slide.key || index}` })
+    ), // Main slides
+    ...slides.slice(0, slidesPerView).map((slide, index) => 
+      cloneElement(slide, { key: `next-${slide.key || index}` })
+    ), // First slidesPerView slides at the end
   ];
 
-  // Create extended items array for seamless circular transition
-  const extendedItems = [...items, items[0]];
+
+
+
+//   // Create extended items array for seamless circular transition
+//   const extendedItems = [...items, items[0]];
 
   const nextSlide = useCallback(() => {
-    if (isTransitioning) return;
+    if (isTransitioning || totalSlides <= slidesPerView) return;
     setIsTransitioning(true);
 
-    if (currentIndex === items.length - 1) {
+    if (currentIndex >= maxIndex) {
       // Move to the duplicate first slide
-      setCurrentIndex(items.length);
+      setCurrentIndex(maxIndex + 1);
       setTimeout(() => {
         // After animation completes, jump to actual first slide without animation
         setCurrentIndex(0);
@@ -51,32 +87,47 @@ function Carousel() {
       setCurrentIndex((prevIndex) => prevIndex + 1);
       setTimeout(() => setIsTransitioning(false), 500);
     }
-  }, [items.length, currentIndex, isTransitioning]);
+  }, [maxIndex, currentIndex, isTransitioning, totalSlides, slidesPerView]);
 
-  const prevSlide = useCallback(() => {
-    if (isTransitioning) return;
+ const prevSlide = useCallback(() => {
+    if (isTransitioning || totalSlides <= slidesPerView) return;
     setIsTransitioning(true);
 
-    if (currentIndex === 0) {
-      // Jump to the duplicate first slide without animation
-      setCurrentIndex(items.length);
+    if (currentIndex <= 0) {
+      // Jump to the duplicate last slide without animation
+      setCurrentIndex(-1);
       setTimeout(() => {
         // Then animate to the last actual slide
-        setCurrentIndex(items.length - 1);
+        setCurrentIndex(maxIndex);
         setIsTransitioning(false);
       }, 50);
     } else {
       setCurrentIndex((prevIndex) => prevIndex - 1);
       setTimeout(() => setIsTransitioning(false), 500);
     }
-  }, [items.length, currentIndex, isTransitioning]);
+  }, [maxIndex, currentIndex, isTransitioning, totalSlides, slidesPerView]);
 
-//   const goToSlide = (index: number) => {
-//     if (isTransitioning || index === currentIndex) return;
-//     setIsTransitioning(true);
-//     setCurrentIndex(index);
-//     setTimeout(() => setIsTransitioning(false), 500);
-//   };
+  //   const goToSlide = (index: number) => {
+  //     if (isTransitioning || index === currentIndex) return;
+  //     setIsTransitioning(true);
+  //     setCurrentIndex(index);
+  //     setTimeout(() => setIsTransitioning(false), 500);
+  //   };
+
+   const goToSlide = (index: number) => {
+    if (isTransitioning || index === currentIndex || totalSlides <= slidesPerView) return;
+    setIsTransitioning(true);
+    setCurrentIndex(index);
+    setTimeout(() => setIsTransitioning(false), 500);
+  };
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (autoPlay && totalSlides > slidesPerView) {
+      const interval = setInterval(nextSlide, autoPlayInterval);
+      return () => clearInterval(interval);
+    }
+  }, [autoPlay, autoPlayInterval, nextSlide, totalSlides, slidesPerView]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -90,7 +141,10 @@ function Carousel() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextSlide, prevSlide, /*isAutoPlaying*/]);
+  }, [nextSlide, prevSlide /*isAutoPlaying*/]);
+
+  // Calculate slide width based on slides per view
+  const slideWidth = 100 / slidesPerView;
 
   return (
     <div className="relative w-full overflow-hidden bg-white mb-16">
@@ -101,36 +155,22 @@ function Carousel() {
           className={`flex h-full transition-transform duration-500 ease-in-out ${
             isTransitioning ? "" : "transition-none"
           }`}
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          style={{ /*transform: `translateX(-${currentIndex * 100}%)`*/
+            transform: `translateX(-${(currentIndex + slidesPerView) * slideWidth}%)`,
+            //width: `${(extendedSlides.length * 100) / slidesPerView}%`
+           }}
         >
-          {extendedItems.map((item, index) => (
-            <div
-              key={`${item.id}-${index}`}
-              className="flex-shrink-0 w-full h-full relative"
-            >
-              {/* Content overlay */}
-              <div
-                className="absolute inset-0"
-                style={{ background: `url(${item.image})`, backgroundSize: "cover" }}
-              >
-                <div className="flex items-center max-w-8xl mx-auto sm:mt-36 mt-12">
-                  <div className="col-span-12 md:col-span-8 max-w-md mx-2">
-                    <h2 className="text-4xl sm:text-5xl font-bold text-green-900">
-                      {item.title}
-                    </h2>
-                    <p className="mt-3 text-base text-gray-700 sm:mt-5 sm:text-lg sm:max-w-xl md:mt-5 md:text-xl">
-                      {item.description}
-                    </p>
-                    <div className="mt-5 sm:mt-8">
-                      <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-200">
-                        JISAJILI SASA
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+           {extendedSlides.map(slide => {
+            const slideProps = slide.props as SlideProps;
+            return cloneElement(slide, {
+              style: { 
+                width: `${slideWidth}%`,
+                ...(slideProps.style || {})
+              },
+              className: `${slideProps.className || ''} flex-shrink-0 h-full relative`
+            } as Partial<SlideProps>);
+
+})}
         </div>
 
         {/* Navigation arrows */}
@@ -150,9 +190,8 @@ function Carousel() {
           <FontAwesomeIcon icon="chevron-right" className="text-3xl" />
         </button>
       </div>
-
     </div>
   );
 }
 
-export { Carousel };
+export { Carousel, Slide };

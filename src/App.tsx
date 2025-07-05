@@ -1,6 +1,6 @@
 import { TopNav } from "./components/Navigation/TopNav";
 import { MainNav } from "./components/Navigation/MainNav";
-import { Carousel } from "./components/Carousel/Carousel";
+import { Carousel, Slide } from "./components/Carousel/Carousel";
 import { Footer } from "./components/Footer/Footer";
 import { Card } from "./components/Card/Card";
 import { Chatbot } from "./components/Chatbot/Chatbot";
@@ -8,15 +8,69 @@ import poultry from "./assets/images/poultry.webp";
 import arrowRight from "./assets/icons/arrow-right.svg";
 import { ServicesTabs } from "./components/Tab/tab";
 import { useState } from "react";
+import samia from "./assets/images/samia.webp";
+import ndinga from "./assets/images/ndinga.webp";
+
+interface CarouselItem {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+}
 
 function CRDBBankClone() {
   const [showCookieNotice, setShowCookieNotice] = useState(true);
+
+  const items: CarouselItem[] = [
+    {
+      id: 1,
+      title: "Samia Infrastructure Financing",
+      description:
+        "Explore breathtaking mountain landscapes and pristine wilderness",
+      image: samia,
+    },
+    {
+      id: 2,
+      title: "Ndinga na Mkwanja Mwaka Mzima",
+      description:
+        "Fanya miamala kwa SimBanking ukiwa na Smartphone au Kiswaswadu",
+      image: ndinga,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNav />
       <MainNav />
-      <Carousel />
+      <Carousel>
+        {items.map(item => (
+          <Slide>
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `url(${item.image})`,
+                backgroundSize: "cover",
+              }}
+            >
+              <div className="flex items-center max-w-8xl mx-auto sm:mt-36 mt-12">
+                <div className="col-span-12 md:col-span-8 max-w-md mx-2">
+                  <h2 className="text-4xl sm:text-5xl font-bold text-green-900">
+                    {item.title}
+                  </h2>
+                  <p className="mt-3 text-base text-gray-700 sm:mt-5 sm:text-lg sm:max-w-xl md:mt-5 md:text-xl">
+                    {item.description}
+                  </p>
+                  <div className="mt-5 sm:mt-8">
+                    <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-200">
+                      JISAJILI SASA
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Slide>
+        ))}
+      </Carousel>
       <ServicesTabs />
 
       <div className="max-w-8xl mx-auto py-8 my-8">
